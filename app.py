@@ -4,6 +4,7 @@ from PIL import Image
 import numpy as np
 import torch
 import cv2
+import io
 
 st.title("🎨 Stroke-based Image Colorization")
 
@@ -41,6 +42,12 @@ canvas_result = st_canvas(
     key="canvas",
 )
 
+if canvas_result.image_data is not None:
+    stroke_img_pil = Image.fromarray(canvas_result.image_data.astype("uint8"))
+    buf_stroke = io.BytesIO()
+    stroke_img_pil.save(buf_stroke, format="PNG")
+    st.download_button("💾 Save Stroke Image", data=buf_stroke.getvalue(), file_name="stroke_image.png", mime="image/png")
+
 # 4️⃣ Colorize when button is clicked
 if st.button("🎨 Colorize Image"):
     if canvas_result.image_data is None:
@@ -74,3 +81,9 @@ if st.button("🎨 Colorize Image"):
 
     st.subheader("3. Colorized Output")
     st.image(rgb_output, caption="Colorized Image", width=256)
+
+    output_pil = Image.fromarray(rgb_output)
+    buf_output = io.BytesIO()
+    output_pil.save(buf_output, format="PNG")
+    st.download_button("💾 Save Colorized Image", data=buf_output.getvalue(), file_name="colorized_image.png", mime="image/png")
+
