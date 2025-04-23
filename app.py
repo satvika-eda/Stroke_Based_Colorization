@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import cv2
 import io
+import datetime
 
 st.title("🎨 Stroke-based Image Colorization")
 
@@ -42,11 +43,14 @@ canvas_result = st_canvas(
     key="canvas",
 )
 
+timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+
 if canvas_result.image_data is not None:
     stroke_img_pil = Image.fromarray(canvas_result.image_data.astype("uint8"))
     buf_stroke = io.BytesIO()
     stroke_img_pil.save(buf_stroke, format="PNG")
-    st.download_button("💾 Save Stroke Image", data=buf_stroke.getvalue(), file_name="stroke_image.png", mime="image/png")
+    stroke_filename = f"stroke_image_{timestamp}.png"
+    st.download_button("💾 Save Stroke Image", data=buf_stroke.getvalue(), file_name=stroke_filename, mime="image/png")
 
 # 4️⃣ Colorize when button is clicked
 if st.button("🎨 Colorize Image"):
@@ -85,5 +89,5 @@ if st.button("🎨 Colorize Image"):
     output_pil = Image.fromarray(rgb_output)
     buf_output = io.BytesIO()
     output_pil.save(buf_output, format="PNG")
-    st.download_button("💾 Save Colorized Image", data=buf_output.getvalue(), file_name="colorized_image.png", mime="image/png")
-
+    colorized_filename = f"colorized_image_{timestamp}.png"
+    st.download_button("💾 Save Colorized Image", data=buf_output.getvalue(), file_name=colorized_filename, mime="image/png")
