@@ -46,12 +46,34 @@ canvas_result = st_canvas(
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 if canvas_result.image_data is not None:
-    stroke_img_pil = Image.fromarray(canvas_result.image_data.astype("uint8"))
-    buf_stroke = io.BytesIO()
-    stroke_img_pil.save(buf_stroke, format="PNG")
-    stroke_filename = f"stroke_image_{timestamp}.png"
-    st.download_button("💾 Save Stroke Image", data=buf_stroke.getvalue(), file_name=stroke_filename, mime="image/png")
-
+    # Get the canvas strokes
+    strokes_only = canvas_result.image_data.astype("uint8")
+    
+    # Convert grayscale image to RGB numpy array (if not already)
+    gray_np = np.array(gray_rgb)
+    
+    # Create a composite image by overlaying strokes on grayscale
+    # Only copy non-transparent pixels from strokes
+    mask = strokes_only[:, :, 3] > 0  # Alpha channel mask
+    composite_img = gray_np.copy()
+    
+    # Apply the strokes where mask is True
+    composite_img[mask] = strokes_only[mask, :3]
+    
+    # Create download button for composite image
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    pil_composite = Image.fromarray(composite_img)
+    buf_composite = io.BytesIO()
+    pil_composite.save(buf_composite, format="PNG")
+    buf_composite.seek(0)
+    
+    st.download_button(
+        "\U0001F4BE Save Stroked Image",
+        data=buf_composite.getvalue(),
+        file_name=f"gray_with_strokes_{timestamp}.png",
+        mime="image/png",
+        key="download_composite"
+    )
 # 4️⃣ Colorize when button is clicked
 if st.button("🎨 Colorize Image"):
     if canvas_result.image_data is None:
