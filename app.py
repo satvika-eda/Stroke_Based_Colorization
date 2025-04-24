@@ -186,22 +186,22 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Load model based on selection
 if mode == "Stroke-Based":
     if model_choice == "U-Net":
-        model_path = "model_20250423_032933.pth"
+        model_path = "stroke_unet.pth"
         model = torch.load(model_path, map_location=device, weights_only=False)
 
     elif model_choice == "GAN":
-        model_path = "generator_epoch2.pth"
+        model_path = "stroke_generator.pth"
         model = ColorizationGenerator()
         model.load_state_dict(torch.load(model_path, map_location=device))
     model = model.to(device).eval()
 
 elif mode == "Free-Form":
     if model_choice == "U-Net":
-        model_path = "resnet_freeform.pth"
+        model_path = "freeform_unet.pth"
         model = ResNetUNetColor().to(device)
         model.load_state_dict(torch.load(model_path, map_location=device))
     elif model_choice == "GAN":
-        model_path = "generator_freeform.pth"
+        model_path = "freeform_generator.pth"
         model = UNetG()
         model.load_state_dict(torch.load(model_path, map_location=device))
     
