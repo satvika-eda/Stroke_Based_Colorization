@@ -1,3 +1,8 @@
+/*
+    Satvika Eda, Divya Sri Bandaru & Dhriti Anjaria
+    23rd April 2025
+    This code is to used to create a web app for stroke-based image colorization using Streamlit.
+*/
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 from PIL import Image
@@ -9,25 +14,25 @@ import datetime
 
 st.title("🎨 Stroke-based Image Colorization")
 
-# 1️⃣ Load your full model
+# Loading model
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = torch.load("model_20250423_032933.pth", map_location=device, weights_only=False)
 model = model.to(device)
 model.eval()
 
-# 2️⃣ Upload grayscale image
-st.subheader("1. Upload a grayscale image")
+# Upload an image
+st.subheader("1. Upload an image")
 uploaded_file = st.file_uploader("Upload a grayscale image (PNG/JPG)", type=["png", "jpg", "jpeg"])
 if uploaded_file is None:
     st.stop()
 
-# Convert uploaded image to grayscale and RGB (for canvas)
+# Converting uploaded image to grayscale and RGB (for canvas)
 gray_image = Image.open(uploaded_file).convert("L").resize((256, 256))
 gray_rgb = gray_image.convert("RGB")
 
 st.image(gray_rgb, caption="Grayscale Input", width=256)
 
-# 3️⃣ Stroke drawing canvas
+# Canvas to draw strokes
 st.subheader("2. Draw your strokes on the image")
 stroke_color = st.color_picker("Pick a stroke color", "#FF0000")
 
@@ -46,21 +51,18 @@ canvas_result = st_canvas(
 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 if canvas_result.image_data is not None:
-    # Get the canvas strokes
     strokes_only = canvas_result.image_data.astype("uint8")
     
-    # Convert grayscale image to RGB numpy array (if not already)
+    # Convert grayscale image to RGB numpy array
     gray_np = np.array(gray_rgb)
     
-    # Create a composite image by overlaying strokes on grayscale
-    # Only copy non-transparent pixels from strokes
-    mask = strokes_only[:, :, 3] > 0  # Alpha channel mask
+    mask = strokes_only[:, :, 3] > 0 
     composite_img = gray_np.copy()
     
     # Apply the strokes where mask is True
     composite_img[mask] = strokes_only[mask, :3]
     
-    # Create download button for composite image
+    # download button for composite image
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     pil_composite = Image.fromarray(composite_img)
     buf_composite = io.BytesIO()
@@ -74,33 +76,33 @@ if canvas_result.image_data is not None:
         mime="image/png",
         key="download_composite"
     )
-# 4️⃣ Colorize when button is clicked
+# Colorize when button is clicked using loaded model
 if st.button("🎨 Colorize Image"):
     if canvas_result.image_data is None:
         st.warning("Please draw at least one stroke.")
         st.stop()
 
-    # Convert grayscale image to LAB L channel
+    # Converting grayscale image to LAB L channel
     gray_np = np.array(gray_rgb)
     lab_gray = cv2.cvtColor(gray_np, cv2.COLOR_RGB2LAB)
     L_channel = lab_gray[..., 0]
     L_tensor = torch.from_numpy(L_channel / 255.0).unsqueeze(0).unsqueeze(0).to(device).float()
 
-    # Convert canvas strokes to AB hints
+    # Converting canvas strokes to AB hints
     strokes_np = canvas_result.image_data[..., :3].astype(np.uint8)
     lab_hint = cv2.cvtColor(strokes_np, cv2.COLOR_RGB2LAB)
     ab_hint = lab_hint[..., 1:].astype(np.float32)
     ab_hint = (ab_hint - 128) / 128.0
     ab_hint_tensor = torch.from_numpy(ab_hint.transpose(2, 0, 1)).unsqueeze(0).to(device).float()
 
-    # Combine L and AB hint: [1, 3, H, W]
+    # Combining L and AB
     input_tensor = torch.cat([L_tensor, ab_hint_tensor], dim=1)
 
     # Model prediction
     with torch.no_grad():
         pred_ab = model(input_tensor)[0].cpu().numpy()
 
-    # Reconstruct LAB and convert to RGB
+    # Reconstructing LAB and convert to RGB
     pred_ab = (pred_ab * 128 + 128).clip(0, 255).astype(np.uint8)
     lab_output = np.stack([L_channel, pred_ab[0], pred_ab[1]], axis=-1).astype(np.uint8)
     rgb_output = cv2.cvtColor(lab_output, cv2.COLOR_LAB2RGB)
