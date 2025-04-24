@@ -2,7 +2,6 @@
 # Satvika Eda, Divya Sri Bandaru & Dhriti Anjaria
 # 23rd April 2025
 # This code is used to create a web app for stroke-based and free-form image colorization using Streamlit.
-# 
 
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
@@ -23,6 +22,50 @@ import numpy as np
 import cv2
 import torchvision.models as models
 import torch.nn.functional as F
+
+# Defined a convolutional block 
+def conv(in_c, out_c, k=4, s=2, p=1, bn=True, act=nn.LeakyReLU(0.2)):
+    layers=[nn.Conv2d(in_c, out_c, k, s, p, bias=False)]
+    if bn: layers.append(nn.BatchNorm2d(out_c))
+    layers.append(act)
+    return nn.Sequential(*layers)
+
+# U-Net generator to encode L input and decode to ab channels
+class UNetG(nn.Module):
+
+    # Initializes the U-Net generator with encoder and decoder layers
+    def __init__(self):
+        super().__init__()
+        # Encoder
+        self.e1 = conv(1,64,bn=False)
+        self.e2 = conv(64,128)
+        self.e3 = conv(128,256)
+        self.e4 = conv(256,512)
+        self.e5 = conv(512,512)
+        self.e6 = conv(512,512)
+        self.e7 = conv(512,512)
+        # Decoder
+        self.d1 = nn.ConvTranspose2d(512,512,4,2,1,bias=False)
+        self.d2 = nn.ConvTranspose2d(1024,512,4,2,1,bias=False)
+        self.d3 = nn.ConvTranspose2d(1024,512,4,2,1,bias=False)
+        self.d4 = nn.ConvTranspose2d(1024,256,4,2,1,bias=False)
+        self.d5 = nn.ConvTranspose2d(512,128,4,2,1,bias=False)
+        self.d6 = nn.ConvTranspose2d(256,64,4,2,1,bias=False)
+        self.out= nn.ConvTranspose2d(128,2,4,2,1)
+        self.relu, self.tanh = nn.ReLU(), nn.Tanh()
+
+    # TO run a forward pass through encoder, decoder, and skip connections
+    def forward(self,x):
+        e1=self.e1(x);  e2=self.e2(e1); e3=self.e3(e2); e4=self.e4(e3)
+        e5=self.e5(e4); e6=self.e6(e5); e7=self.e7(e6)
+        d1=self.relu(self.d1(e7))
+        d2=self.relu(self.d2(torch.cat([d1,e6],1)))
+        d3=self.relu(self.d3(torch.cat([d2,e5],1)))
+        d4=self.relu(self.d4(torch.cat([d3,e4],1)))
+        d5=self.relu(self.d5(torch.cat([d4,e3],1)))
+        d6=self.relu(self.d6(torch.cat([d5,e2],1)))
+        return self.tanh(self.out(torch.cat([d6,e1],1)))
+
 
 # ResNet U-Net-like architecture for colorization of free form strokes
 class ResNetUNetColor(nn.Module):
@@ -159,7 +202,7 @@ elif mode == "Free-Form":
         model.load_state_dict(torch.load(model_path, map_location=device))
     elif model_choice == "GAN":
         model_path = "generator_freeform.pth"
-        model = ColorizationGenerator()
+        model = UNetG()
         model.load_state_dict(torch.load(model_path, map_location=device))
     
 # Upload image

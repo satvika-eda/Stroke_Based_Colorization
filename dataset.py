@@ -1,8 +1,8 @@
-/*
-    Satvika Eda, Divya Sri Bandaru & Dhriti Anjaria
-    2nd April 2025
-    This code is part of the MultiCueStrokeDataset class, which is designed for stroke based colorization.
-*/
+#
+#   Satvika Eda, Divya Sri Bandaru & Dhriti Anjaria
+#   12th April 2025
+#   This code is part of the MultiCueStrokeDataset class, which is designed for stroke based colorization.
+#
 
 import numpy as np
 import cv2
@@ -13,26 +13,7 @@ from PIL import Image
 import torch
 import random
 
-# ============================================
-# MultiCueStrokeDataset: Custom Stroke-Based Colorization Dataset
-# ============================================
-# This dataset is designed for training models on stroke-based image colorization.
-# It simulates user-intent strokes on grayscale images based on object-aware regions.
-
-# Key Features:
-# - Uses DeepLabV3 (ResNet50) pretrained model to generate semantic segmentation masks.
-# - For each object segment, colored strokes are drawn directly on the image.
-# - Color hints are extracted from the original image and converted to LAB space.
-# - Input is a 4-channel tensor: [L (grayscale), a_hint, b_hint, mask].
-# - Target is the ground truth ab chrominance channels from the original LAB image.
-
-# Returns:
-# - input_tensor: 4-channel input for the model.
-# - ab_gt_tensor: Ground truth ab channels for supervision.
-
-# This dataset is compatible with models like U-Net or GANs for learning
-# stroke-aware colorization, enabling training on 63K+ images with diverse structure and intent.
-
+# This class is used to create a dataset for stroke-based colorization using multiple cues.
 class MultiCueStrokeDataset(Dataset):
     def __init__(self, image_paths, img_size=256,
                  strokes_per_object=30, stroke_thickness=(8, 16), device=None):
