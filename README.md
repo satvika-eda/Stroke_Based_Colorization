@@ -11,7 +11,7 @@ For this, we use a U-Net with a ResNet34 encoder and ControlNet with Stable Diff
 All models are trained on subsets of ImageNet—100 classes for free-form and 50 for stroke-based colorization.
 
 
-Link to the presentation: 
+Link to the presentation: https://drive.google.com/drive/u/0/folders/11BpqAQXjux7UmsH7G5R8p7p6A13uuRyN
 
 | **Filename**                                                   | **Description**                                                                                                          |
 |----------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
