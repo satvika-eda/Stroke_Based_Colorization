@@ -12,3 +12,18 @@ All models are trained on subsets of ImageNet—100 classes for free-form and 50
 
 
 Link to the presentation: 
+
+| **Filename**                                                   | **Description**                                                                                                          |
+|----------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| `App.py`                                                       | Streamlit web app for image colorization.                                                                                |
+| `controlnet-and-stable-diffusion.ipynb`                        | Fine-tuning ControlNet and zero-shot inference using Stable Diffusion + fine-tuned ControlNet for stroke-based colorization. |
+| `dataset and controlnet + stable diffusion model.ipynb`        | Inference for stroke-based colorization using only pretrained models.                                                   |
+| `dataset.py`                                                   | Contains the `MultiCueStrokeDataset` class.                                                                             |
+| `freeformGan.ipynb`                                            | Free-form image colorization using GAN.                                                                                 |
+| `freeform-autoencoder.ipynb`                                   | Baseline autoencoder model for free-form colorization.                                                                  |
+| `freeform-resnet-unet.ipynb`                                   | Free-form image colorization using ResNet-UNet hybrid.                                                                  |
+| `freeform-stable-diffusion.ipynb`                              | Free-form image colorization using Stable Diffusion v1.5.                                                               |
+| `freeform-unet.ipynb`                                          | Free-form image colorization using U-Net.                                                                               |
+| `stroke-controlnet + stable diffusion -model-inference.ipynb`  | Inference for stroke-based colorization using pretrained models; includes dataset experiments and visualization.        |
+| `stroke-controlnet-and-stable-diffusion-training.ipynb`        | Fine-tuning ControlNet and inference with Stable Diffusion + ControlNet for stroke-based colorization.                 |
+| `stroke-unet-gan.ipynb`                                        | Training a stroke-based U-Net model with ResNet34 encoder and GAN architecture.                                         |
