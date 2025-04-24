@@ -1,4 +1,4 @@
-# Stroke-Based and Free-Form Image Colorization Using Stable Diffusion and ControlNet
+# Stroke-Based and Free-Form Image Colorization
 
 Group Members: Divya Sri Bandaru, Dhriti Anjaria, Satvika Eda
 
